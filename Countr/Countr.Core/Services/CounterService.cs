@@ -2,16 +2,20 @@
 using System.Threading.Tasks;
 using Countr.Core.Models;
 using Countr.Core.Repositories;
+using MvvmCross.Plugins.Messenger;
 
 namespace Countr.Core.Services
 {
     public class CounterService : ICountersService
     {
         private readonly ICountersRepository repository;
+        private readonly IMvxMessenger messenger;
 
-        public CounterService(ICountersRepository repository)
+        public CounterService(ICountersRepository repository, IMvxMessenger messenger
+        )
         {
             this.repository = repository;
+            this.messenger = messenger;
         }
 
         public async Task<Counter> AddNewCounter(string name)
@@ -23,6 +27,8 @@ namespace Countr.Core.Services
 
             await repository.Save(counter).ConfigureAwait(false);
 
+            messenger.Publish(new CountersChangedMessage(this));
+
             return counter;
 
         }
@@ -32,9 +38,10 @@ namespace Countr.Core.Services
             return repository.GetAll();
         }
 
-        public Task DeleteCounter(Counter counter)
+        public async Task DeleteCounter(Counter counter)
         {
-            return repository.Delete(counter);
+            await repository.Delete(counter).ConfigureAwait(false);
+            messenger.Publish(new CountersChangedMessage(this));
         }
 
         public Task IncrementCounter(Counter counter)

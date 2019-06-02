@@ -5,21 +5,37 @@ using Countr.Core.Services;
 using Countr.Core.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using MvvmCross.Plugins.Messenger;
 
 namespace Countr.Core.Tests
 {
     [TestClass]
     public class CountersServiceTests
     {
+
         private ICountersService service;
         private Mock<ICountersRepository> repo;
+        private Mock<IMvxMessenger> messenger;
 
         [TestInitialize]
         public void MyTestInitialize()
         {
+            messenger = new Mock<IMvxMessenger>();
             repo = new Mock<ICountersRepository>();
-            service = new CounterService(repo.Object);
+            service = new CounterService(repo.Object, messenger.Object);
         }
+
+        [TestMethod]
+        public async Task DeleteCounter_PublishesMessage()
+        {
+            // Act
+            await service.DeleteCounter(new Counter());
+
+            // Assert
+            messenger.Verify(m => m.Publish
+                (It.IsAny<CountersChangedMessage>()));
+        }
+
 
         [TestMethod]
         public async Task IncrementCounter_IncrementsTheCounter()

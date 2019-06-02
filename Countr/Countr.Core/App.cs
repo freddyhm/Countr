@@ -12,7 +12,7 @@ namespace Countr.Core
                 .AsInterfaces()
                 .RegisterAsLazySingleton();
 
-            RegisterNavigationServiceAppStart<ViewModels.CounterViewModel>();
+            RegisterNavigationServiceAppStart<ViewModels.CountersViewModel>();
         }
     }
 }
